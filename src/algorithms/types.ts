@@ -9,11 +9,18 @@ export interface BaseStep {
 
 export type SortStep = BaseStep &
   (
-    | { type: 'compare'; indices: [number, number] }
+    | {
+        type: 'compare'
+        indices: [number, number]
+        keepMsg?: string
+      }
     | { type: 'swap'; indices: [number, number] }
+    | { type: 'select'; index: number }
     | { type: 'write'; index: number; value: number }
     | { type: 'sorted'; index: number }
   )
+
+export type CompareStyle = 'swap' | 'smallest'
 
 export interface AlgorithmDef<TInput, TStep> {
   id: string
@@ -21,4 +28,5 @@ export interface AlgorithmDef<TInput, TStep> {
   category: 'sorting' | 'searching' | 'pathfinding'
   complexity: { best: string; average: string; worst: string; space: string }
   run: (input: TInput, opts?: { order: Order }) => TStep[]
+  // `explanation` is added in Phase 14.
 }
