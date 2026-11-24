@@ -100,6 +100,27 @@ describe('PlayScreen', () => {
     expect(screen.getByLabelText('Game stats')).toHaveTextContent('Score 0')
   })
 
+  it('highlights the compare line and shows the variables', () => {
+    setup()
+    expect(document.querySelector('[aria-current="step"]')).toHaveTextContent(
+      'if (arr[j] > arr[j + 1])',
+    )
+    expect(screen.getByText('i = 0')).toBeInTheDocument()
+    expect(screen.getByText('j = 0')).toBeInTheDocument()
+  })
+
+  it('the variables follow the player to the next pair', async () => {
+    const { swap } = setup()
+    await swap()
+    expect(screen.getByText('j = 1')).toBeInTheDocument()
+  })
+
+  it('shows no highlighted line once the level is over', async () => {
+    const { keep } = setup(1)
+    await keep()
+    expect(document.querySelector('[aria-current]')).toBeNull()
+  })
+
   it('Watch replay opens from the end-of-level panel', async () => {
     const { user, keep } = setup(1)
     await keep()
