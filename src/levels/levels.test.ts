@@ -5,6 +5,11 @@ import {
   createInitialState,
 } from '../game/beTheAlgorithm'
 import { perfectMoves } from '../game/perfectRun'
+import {
+  createPredictState,
+  perfectPredictMoves,
+  predictReducer,
+} from '../game/predict'
 import { calculateStars } from '../game/scoring'
 import { BoxValuesSchema } from '../schemas/boxes'
 import { LEVELS } from './levels'
@@ -21,9 +26,9 @@ describe('level data', () => {
     })
   })
 
-  it('only uses the playable mode for now', () => {
+  it('only uses playable modes for now', () => {
     for (const level of LEVELS) {
-      expect(level.mode).toBe('be-the-algorithm')
+      expect(['be-the-algorithm', 'predict']).toContain(level.mode)
     }
   })
 })
@@ -49,13 +54,18 @@ describe.each(LEVELS)('level $id', (level) => {
     if (!algorithm) throw new Error('unknown algorithm')
 
     const steps = algorithm.run(level.input, { order: level.order })
-    const moves = perfectMoves(steps)
+    const predict = level.mode === 'predict'
+    const moves = predict ? perfectPredictMoves(steps) : perfectMoves(steps)
     expect(moves.length).toBeGreaterThanOrEqual(3)
 
-    let state = createInitialState(steps, level.lives)
+    let state = predict
+      ? createPredictState(steps, level.lives)
+      : createInitialState(steps, level.lives)
     for (const move of moves) {
       expect(state.status).toBe('playing')
-      state = beTheAlgorithmReducer(state, move, steps)
+      state = predict
+        ? predictReducer(state, move, steps)
+        : beTheAlgorithmReducer(state, move, steps)
     }
 
     expect(state.status).toBe('won')
