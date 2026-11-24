@@ -2,6 +2,7 @@ import { useCallback } from 'react'
 import { getSortingAlgorithm } from '../../algorithms/registry'
 import type { LevelDef } from '../../levels/types'
 import { PlayScreen, type GameResult } from './PlayScreen'
+import { PredictScreen } from './PredictScreen'
 
 interface LevelScreenProps {
   level: LevelDef
@@ -30,6 +31,25 @@ export function LevelScreen({
     return <p role="alert">Unknown algorithm: {level.algorithmId}</p>
   }
 
+  const gameProps = {
+    title: `Level ${number}: ${level.title}`,
+    algorithm,
+    input: level.input,
+    order: level.order,
+    lives: level.lives,
+    starRules: level.stars,
+    onComplete: handleComplete,
+    endActions: nextLevel && (
+      <button
+        type="button"
+        onClick={() => onSelectLevel(nextLevel.id)}
+        className="rounded-lg border-2 border-emerald-400 bg-emerald-500/20 px-6 py-2 font-semibold hover:bg-emerald-500/30 focus:outline-2 focus:outline-offset-2 focus:outline-sky-400"
+      >
+        Next level
+      </button>
+    ),
+  }
+
   return (
     <div className="flex w-full max-w-5xl flex-col items-start gap-4">
       <button
@@ -39,26 +59,11 @@ export function LevelScreen({
       >
         Back to map
       </button>
-      <PlayScreen
-        title={`Level ${number}: ${level.title}`}
-        algorithm={algorithm}
-        input={level.input}
-        order={level.order}
-        lives={level.lives}
-        starRules={level.stars}
-        onComplete={handleComplete}
-        endActions={
-          nextLevel && (
-            <button
-              type="button"
-              onClick={() => onSelectLevel(nextLevel.id)}
-              className="rounded-lg border-2 border-emerald-400 bg-emerald-500/20 px-6 py-2 font-semibold hover:bg-emerald-500/30 focus:outline-2 focus:outline-offset-2 focus:outline-sky-400"
-            >
-              Next level
-            </button>
-          )
-        }
-      />
+      {level.mode === 'predict' ? (
+        <PredictScreen {...gameProps} />
+      ) : (
+        <PlayScreen {...gameProps} />
+      )}
     </div>
   )
 }
