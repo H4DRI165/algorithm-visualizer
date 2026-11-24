@@ -4,6 +4,7 @@ export type GameMode =
 export type Move =
   | { type: 'swap'; indices: [number, number] }
   | { type: 'keep' }
+  | { type: 'select'; index: number }
   | { type: 'choose'; optionId: string }
 
 export interface GameState {

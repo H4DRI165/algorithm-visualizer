@@ -1,6 +1,9 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import {
+  bubbleSortAlgorithm,
+  type SortingAlgorithm,
+} from '../../algorithms/registry'
 import type { Order } from '../../algorithms/types'
-import { getBubbleSortListing } from '../../code/bubbleSort'
 import { DEFAULT_LIVES } from '../../game/scoring'
 import { isTypingTarget } from '../../hooks/keyboard'
 import { useGame } from '../../hooks/useGame'
@@ -17,6 +20,7 @@ interface PlayScreenProps {
   input: readonly number[]
   order?: Order
   lives?: number
+  algorithm?: SortingAlgorithm
 }
 
 export function PlayScreen({
@@ -24,18 +28,16 @@ export function PlayScreen({
   input,
   order = 'asc',
   lives = DEFAULT_LIVES,
+  algorithm = bubbleSortAlgorithm,
 }: PlayScreenProps) {
-  const game = useGame(input, order, lives)
-  const { state, swap, keep } = game
+  const game = useGame(algorithm, input, order, lives)
+  const { state, prompt, play } = game
   const playing = state.status === 'playing'
-  const listing = useMemo(() => getBubbleSortListing(order), [order])
+  const options = prompt?.options
+  const listing = useMemo(() => algorithm.listing(order), [algorithm, order])
 
-  // null = playing the game; a number = watching, starting at that step.
   const [watchFrom, setWatchFrom] = useState<number | null>(null)
   const watching = watchFrom !== null
-
-  // Open Watch on the pair the player is looking at. It does not reveal
-  // the answer: pressing Next shows what the algorithm does.
   const { cursor } = state
   const openHint = useCallback(() => setWatchFrom(cursor + 1), [cursor])
 
@@ -45,13 +47,13 @@ export function PlayScreen({
       if (e.ctrlKey || e.metaKey || e.altKey) return
       if (isTypingTarget(e.target)) return
       const key = e.key.toLowerCase()
-      if (key === 's') swap()
-      else if (key === 'k') keep()
+      const option = options?.find((o) => o.shortcut.toLowerCase() === key)
+      if (option) play(option.move)
       else if (key === 'h' && playing) openHint()
     }
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)
-  }, [watching, playing, swap, keep, openHint])
+  }, [watching, playing, options, play, openHint])
 
   if (watchFrom !== null) {
     return (
@@ -88,17 +90,18 @@ export function PlayScreen({
             <Board values={game.values} states={game.states} />
 
             {playing ? (
-              <>
-                <p className="text-center text-slate-300">
-                  {game.caption}. Should these two swap?
-                </p>
-                <PlayControls
-                  disabled={!playing}
-                  onSwap={swap}
-                  onKeep={keep}
-                  onHint={openHint}
-                />
-              </>
+              prompt && (
+                <>
+                  <p className="text-center text-slate-300">
+                    {prompt.question}
+                  </p>
+                  <PlayControls
+                    options={prompt.options}
+                    onChoose={play}
+                    onHint={openHint}
+                  />
+                </>
+              )
             ) : (
               <div className="flex flex-col items-center gap-3 rounded-lg border border-slate-700 bg-slate-800 p-4">
                 <p className="text-lg font-semibold">
@@ -131,10 +134,7 @@ export function PlayScreen({
               </div>
             )}
 
-            <Feedback
-              result={state.lastResult}
-              fallback="Swap if the left box is bigger, keep if the pair is already in order."
-            />
+            <Feedback result={state.lastResult} fallback={game.hint} />
           </>
         }
         code={

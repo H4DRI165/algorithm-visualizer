@@ -1,9 +1,5 @@
 import type { Order, SortStep } from '../types'
-import { at } from '../utils'
-
-function isOutOfOrder(a: number, b: number, order: Order): boolean {
-  return order === 'asc' ? a > b : a < b
-}
+import { at, isOutOfOrder } from '../utils'
 
 export function bubbleSort(
   input: readonly number[],

@@ -3,32 +3,75 @@ import { DEFAULT_LIVES, pointsForCorrect } from './scoring'
 import type { GameState, Move } from './types'
 
 export type ExpectedMove =
-  { type: 'keep' } | { type: 'swap'; indices: [number, number]; msg: string }
+  | { type: 'keep'; msg?: string }
+  | { type: 'swap'; indices: [number, number]; msg: string }
+  | { type: 'select'; index: number; msg: string }
 
-function skipToCompare(steps: readonly SortStep[], from: number): number {
+const DEFAULT_KEEP_MSG = 'This pair is already in order, so keep it'
+
+function sameIndices(a: [number, number], b: [number, number]): boolean {
+  return (a[0] === b[0] && a[1] === b[1]) || (a[0] === b[1] && a[1] === b[0])
+}
+
+function skipToPrompt(steps: readonly SortStep[], from: number): number {
   let i = from
-  while (i < steps.length && steps[i]?.type !== 'compare') i++
+  while (i < steps.length) {
+    const type = steps[i]?.type
+    if (type === 'compare' || type === 'swap') break
+    i++
+  }
   return i
+}
+
+interface Resolved {
+  expected: ExpectedMove
+  consumed: number
+}
+
+function resolve(steps: readonly SortStep[], cursor: number): Resolved | null {
+  const current = steps[cursor]
+  if (current === undefined) return null
+
+  if (current.type === 'swap') {
+    return {
+      expected: { type: 'swap', indices: current.indices, msg: current.msg },
+      consumed: 1,
+    }
+  }
+  if (current.type !== 'compare') return null
+
+  const next = steps[cursor + 1]
+  if (next?.type === 'swap' && sameIndices(next.indices, current.indices)) {
+    return {
+      expected: { type: 'swap', indices: next.indices, msg: next.msg },
+      consumed: 2,
+    }
+  }
+  if (next?.type === 'select') {
+    return {
+      expected: { type: 'select', index: next.index, msg: next.msg },
+      consumed: 2,
+    }
+  }
+  const keep: ExpectedMove =
+    current.keepMsg === undefined
+      ? { type: 'keep' }
+      : { type: 'keep', msg: current.keepMsg }
+  return { expected: keep, consumed: 1 }
 }
 
 export function getExpectedMove(
   steps: readonly SortStep[],
   cursor: number,
 ): ExpectedMove | null {
-  const current = steps[cursor]
-  if (current?.type !== 'compare') return null
-  const next = steps[cursor + 1]
-  if (next?.type === 'swap') {
-    return { type: 'swap', indices: next.indices, msg: next.msg }
-  }
-  return { type: 'keep' }
+  return resolve(steps, cursor)?.expected ?? null
 }
 
 export function createInitialState(
   steps: readonly SortStep[],
   lives: number = DEFAULT_LIVES,
 ): GameState {
-  const cursor = skipToCompare(steps, 0)
+  const cursor = skipToPrompt(steps, 0)
   return {
     cursor,
     lives,
@@ -39,19 +82,21 @@ export function createInitialState(
   }
 }
 
-function sameIndices(a: [number, number], b: [number, number]): boolean {
-  return (a[0] === b[0] && a[1] === b[1]) || (a[0] === b[1] && a[1] === b[0])
-}
-
 function matches(move: Move, expected: ExpectedMove): boolean {
-  if (expected.type === 'keep') return move.type === 'keep'
-  return move.type === 'swap' && sameIndices(move.indices, expected.indices)
+  switch (expected.type) {
+    case 'keep':
+      return move.type === 'keep'
+    case 'swap':
+      return move.type === 'swap' && sameIndices(move.indices, expected.indices)
+    case 'select':
+      return move.type === 'select' && move.index === expected.index
+  }
 }
 
 function explain(expected: ExpectedMove): string {
-  return expected.type === 'swap'
-    ? expected.msg
-    : 'This pair is already in order, so keep it'
+  return expected.type === 'keep'
+    ? (expected.msg ?? DEFAULT_KEEP_MSG)
+    : expected.msg
 }
 
 export function beTheAlgorithmReducer(
@@ -62,12 +107,12 @@ export function beTheAlgorithmReducer(
   if (state.status !== 'playing') return state
   if (move.type === 'choose') return state
 
-  const expected = getExpectedMove(steps, state.cursor)
-  if (expected === null) return state
+  const resolved = resolve(steps, state.cursor)
+  if (resolved === null) return state
+  const { expected, consumed } = resolved
 
   if (matches(move, expected)) {
-    const consumed = expected.type === 'swap' ? 2 : 1
-    const cursor = skipToCompare(steps, state.cursor + consumed)
+    const cursor = skipToPrompt(steps, state.cursor + consumed)
     return {
       ...state,
       cursor,

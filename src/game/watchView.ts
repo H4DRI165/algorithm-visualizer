@@ -20,6 +20,7 @@ export function getWatchView(
   const end = Math.min(Math.max(position, 0), steps.length)
   let comparisons = 0
   let swaps = 0
+  let min: number | undefined
 
   for (let k = 0; k < end; k++) {
     const step = steps[k]
@@ -38,18 +39,26 @@ export function getWatchView(
         values[y] = a
         break
       }
+      case 'select':
+        min = step.index
+        break
       case 'write':
         values[step.index] = step.value
         break
       case 'sorted':
         states[step.index] = 'sorted'
+        min = undefined
         break
     }
   }
 
+  if (min !== undefined && states[min] === 'idle') states[min] = 'selected'
+
   const last = end > 0 ? steps[end - 1] : undefined
   if (last?.type === 'compare') {
     for (const i of last.indices) states[i] = 'comparing'
+    if (min !== undefined && last.indices.includes(min))
+      states[min] = 'selected'
   } else if (last?.type === 'swap') {
     for (const i of last.indices) states[i] = 'swapping'
   }
