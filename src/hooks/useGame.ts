@@ -56,6 +56,7 @@ export function useGame(
 
   return {
     state,
+    steps,
     maxLives: lives,
     values: view.values,
     states: view.states,

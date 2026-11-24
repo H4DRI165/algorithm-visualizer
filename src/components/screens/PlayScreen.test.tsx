@@ -71,4 +71,39 @@ describe('PlayScreen', () => {
     await user.keyboard('k')
     expect(screen.getByLabelText('Game stats')).toHaveTextContent('Streak 2')
   })
+
+  it('Hint opens Watch at the current pair without spoiling the answer', async () => {
+    const { user } = setup()
+    await user.click(screen.getByRole('button', { name: /hint/i }))
+    expect(screen.getByText('Step 1 of 7')).toBeInTheDocument()
+    expect(screen.getByText('Compare 2 and 1')).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /^swap/i })).toBeNull()
+  })
+
+  it('returning from a hint keeps the game state', async () => {
+    const { user, swap } = setup()
+    await swap()
+    await user.click(screen.getByRole('button', { name: /hint/i }))
+    expect(screen.getByText('Step 3 of 7')).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: 'Back to game' }))
+    expect(screen.getByLabelText('Game stats')).toHaveTextContent('Score 10')
+    expect(screen.getByLabelText('Box 2: 2, comparing')).toBeInTheDocument()
+  })
+
+  it('the H key opens a hint, and S/K do nothing while watching', async () => {
+    const { user } = setup()
+    await user.keyboard('h')
+    expect(screen.getByText('Step 1 of 7')).toBeInTheDocument()
+    await user.keyboard('s')
+    await user.click(screen.getByRole('button', { name: 'Back to game' }))
+    expect(screen.getByLabelText('Game stats')).toHaveTextContent('Score 0')
+  })
+
+  it('Watch replay opens from the end-of-level panel', async () => {
+    const { user, keep } = setup(1)
+    await keep()
+    await user.click(screen.getByRole('button', { name: /watch replay/i }))
+    expect(screen.getByText('Step 0 of 7')).toBeInTheDocument()
+  })
 })
