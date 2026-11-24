@@ -7,6 +7,8 @@ export interface LevelDef {
   title: string
   mode: GameMode
   algorithmId: string
+  /** Race only: the second algorithm. `algorithmId` is side A, this is side B. */
+  rivalId?: string
   input: readonly number[]
   order: Order
   lives: number

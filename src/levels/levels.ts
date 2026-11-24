@@ -164,5 +164,41 @@ export const LEVELS: readonly LevelDef[] = [
     order: 'desc',
     lives: 3, // not used in free play
     stars: { two: 1, three: 0 },
+    unlocks: 'race-1',
+  },
+  {
+    id: 'race-1',
+    title: 'Nearly Sorted',
+    mode: 'race',
+    algorithmId: 'bubble-sort',
+    rivalId: 'insertion-sort',
+    input: [1, 2, 4, 3, 5],
+    order: 'asc',
+    lives: 3, // not used in a race
+    stars: { two: 0, three: 0 },
+    unlocks: 'race-2',
+  },
+  {
+    id: 'race-2',
+    title: 'Fewest Swaps Wins',
+    mode: 'race',
+    algorithmId: 'selection-sort',
+    rivalId: 'insertion-sort',
+    input: [5, 4, 3, 2, 1],
+    order: 'asc',
+    lives: 3, // not used in a race
+    stars: { two: 0, three: 0 },
+    unlocks: 'race-3',
+  },
+  {
+    id: 'race-3',
+    title: 'Already Sorted',
+    mode: 'race',
+    algorithmId: 'selection-sort',
+    rivalId: 'insertion-sort',
+    input: [2, 4, 6, 8, 10, 12],
+    order: 'asc',
+    lives: 3, // not used in a race
+    stars: { two: 0, three: 0 },
   },
 ]

@@ -4,6 +4,7 @@ import type { LevelDef } from '../../levels/types'
 import { BeatScreen } from './BeatScreen'
 import { PlayScreen } from './PlayScreen'
 import { PredictScreen } from './PredictScreen'
+import { RaceScreen } from './RaceScreen'
 
 interface LevelScreenProps {
   level: LevelDef
@@ -53,7 +54,13 @@ export function LevelScreen({
   }
 
   let game
-  if (level.mode === 'predict') {
+  if (level.mode === 'race') {
+    const rival = level.rivalId ? getSortingAlgorithm(level.rivalId) : undefined
+    if (!rival) {
+      return <p role="alert">Unknown rival: {level.rivalId ?? 'none'}</p>
+    }
+    game = <RaceScreen {...gameProps} rival={rival} />
+  } else if (level.mode === 'predict') {
     game = <PredictScreen {...gameProps} />
   } else if (level.mode === 'beat-the-algorithm') {
     game = <BeatScreen {...gameProps} />
