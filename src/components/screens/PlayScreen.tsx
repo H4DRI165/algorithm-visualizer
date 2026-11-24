@@ -1,12 +1,15 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import type { Order } from '../../algorithms/types'
+import { getBubbleSortListing } from '../../code/bubbleSort'
 import { DEFAULT_LIVES } from '../../game/scoring'
 import { isTypingTarget } from '../../hooks/keyboard'
 import { useGame } from '../../hooks/useGame'
 import { Board } from '../board/Board'
+import { CodeView } from '../code/CodeView'
 import { Feedback } from '../game/Feedback'
 import { Hud } from '../game/Hud'
 import { PlayControls } from '../game/PlayControls'
+import { SplitLayout } from '../layout/SplitLayout'
 import { WatchScreen } from './WatchScreen'
 
 interface PlayScreenProps {
@@ -25,8 +28,14 @@ export function PlayScreen({
   const game = useGame(input, order, lives)
   const { state, swap, keep } = game
   const playing = state.status === 'playing'
+  const listing = useMemo(() => getBubbleSortListing(order), [order])
+
+  // null = playing the game; a number = watching, starting at that step.
   const [watchFrom, setWatchFrom] = useState<number | null>(null)
   const watching = watchFrom !== null
+
+  // Open Watch on the pair the player is looking at. It does not reveal
+  // the answer: pressing Next shows what the algorithm does.
   const { cursor } = state
   const openHint = useCallback(() => setWatchFrom(cursor + 1), [cursor])
 
@@ -50,6 +59,7 @@ export function PlayScreen({
         title={`Watch: ${title}`}
         input={input}
         steps={game.steps}
+        listing={listing}
         startAt={watchFrom}
         onClose={() => setWatchFrom(null)}
         closeLabel="Back to game"
@@ -60,7 +70,7 @@ export function PlayScreen({
   return (
     <section
       aria-label={title}
-      className="flex w-full max-w-2xl flex-col gap-6"
+      className="flex w-full max-w-5xl flex-col gap-6"
     >
       <h2 className="text-xl font-semibold">{title}</h2>
 
@@ -72,55 +82,64 @@ export function PlayScreen({
         mistakes={state.mistakes}
       />
 
-      <Board values={game.values} states={game.states} />
+      <SplitLayout
+        board={
+          <>
+            <Board values={game.values} states={game.states} />
 
-      {playing ? (
-        <>
-          <p className="text-center text-slate-300">
-            {game.caption}. Should these two swap?
-          </p>
-          <PlayControls
-            disabled={!playing}
-            onSwap={swap}
-            onKeep={keep}
-            onHint={openHint}
-          />
-        </>
-      ) : (
-        <div className="flex flex-col items-center gap-3 rounded-lg border border-slate-700 bg-slate-800 p-4">
-          <p className="text-lg font-semibold">
-            {state.status === 'won' ? 'Level complete!' : 'Out of lives'}
-          </p>
-          <span
-            role="img"
-            aria-label={`${game.stars} of 3 stars`}
-            className="text-2xl text-amber-300"
-          >
-            {'★'.repeat(game.stars)}
-            {'☆'.repeat(3 - game.stars)}
-          </span>
-          <div className="flex flex-wrap justify-center gap-3">
-            <button
-              type="button"
-              onClick={game.restart}
-              className="rounded-lg border-2 border-sky-400 bg-sky-500/20 px-6 py-2 font-semibold hover:bg-sky-500/30 focus:outline-2 focus:outline-offset-2 focus:outline-sky-400"
-            >
-              Play again
-            </button>
-            <button
-              type="button"
-              onClick={() => setWatchFrom(0)}
-              className="rounded-lg border-2 border-slate-500 px-6 py-2 font-semibold hover:bg-slate-700 focus:outline-2 focus:outline-offset-2 focus:outline-sky-400"
-            >
-              Watch replay
-            </button>
-          </div>
-        </div>
-      )}
+            {playing ? (
+              <>
+                <p className="text-center text-slate-300">
+                  {game.caption}. Should these two swap?
+                </p>
+                <PlayControls
+                  disabled={!playing}
+                  onSwap={swap}
+                  onKeep={keep}
+                  onHint={openHint}
+                />
+              </>
+            ) : (
+              <div className="flex flex-col items-center gap-3 rounded-lg border border-slate-700 bg-slate-800 p-4">
+                <p className="text-lg font-semibold">
+                  {state.status === 'won' ? 'Level complete!' : 'Out of lives'}
+                </p>
+                <span
+                  role="img"
+                  aria-label={`${game.stars} of 3 stars`}
+                  className="text-2xl text-amber-300"
+                >
+                  {'★'.repeat(game.stars)}
+                  {'☆'.repeat(3 - game.stars)}
+                </span>
+                <div className="flex flex-wrap justify-center gap-3">
+                  <button
+                    type="button"
+                    onClick={game.restart}
+                    className="rounded-lg border-2 border-sky-400 bg-sky-500/20 px-6 py-2 font-semibold hover:bg-sky-500/30 focus:outline-2 focus:outline-offset-2 focus:outline-sky-400"
+                  >
+                    Play again
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setWatchFrom(0)}
+                    className="rounded-lg border-2 border-slate-500 px-6 py-2 font-semibold hover:bg-slate-700 focus:outline-2 focus:outline-offset-2 focus:outline-sky-400"
+                  >
+                    Watch replay
+                  </button>
+                </div>
+              </div>
+            )}
 
-      <Feedback
-        result={state.lastResult}
-        fallback="Swap if the left box is bigger, keep if the pair is already in order."
+            <Feedback
+              result={state.lastResult}
+              fallback="Swap if the left box is bigger, keep if the pair is already in order."
+            />
+          </>
+        }
+        code={
+          <CodeView listing={listing} anchor={game.anchor} vars={game.vars} />
+        }
       />
     </section>
   )

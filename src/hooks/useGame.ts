@@ -61,6 +61,8 @@ export function useGame(
     values: view.values,
     states: view.states,
     caption: current?.msg ?? '',
+    anchor: current?.anchor,
+    vars: current?.vars,
     stars: calculateStars(state.status, state.mistakes),
     swap,
     keep,

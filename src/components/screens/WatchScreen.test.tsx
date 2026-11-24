@@ -3,6 +3,7 @@ import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
 import { bubbleSort } from '../../algorithms/sorting/bubbleSort'
 import { WatchScreen } from './WatchScreen'
+import { getBubbleSortListing } from '../../code/bubbleSort'
 
 // 7 steps for [2, 1, 3]: see watchView.test.ts
 const input = [2, 1, 3]
@@ -15,6 +16,7 @@ function setup(startAt?: number, onClose?: () => void) {
       title="Watch test"
       input={input}
       steps={steps}
+      listing={getBubbleSortListing('asc')}
       startAt={startAt}
       onClose={onClose}
     />,
@@ -92,6 +94,29 @@ describe('WatchScreen', () => {
     expect(screen.getByRole('button', { name: 'Pause' })).toBeInTheDocument()
     await user.click(screen.getByRole('button', { name: 'Pause' }))
     expect(screen.getByRole('button', { name: 'Play' })).toBeInTheDocument()
+  })
+
+  it('highlights no code line before the first step', () => {
+    setup()
+    expect(document.querySelector('[aria-current]')).toBeNull()
+    expect(screen.getByText('none yet')).toBeInTheDocument()
+  })
+
+  it('highlights the compare line and shows the variables', async () => {
+    const user = setup()
+    await user.click(screen.getByRole('button', { name: 'Next' }))
+    const current = document.querySelector('[aria-current="step"]')
+    expect(current).toHaveTextContent('if (arr[j] > arr[j + 1])')
+    expect(screen.getByText('i = 0')).toBeInTheDocument()
+    expect(screen.getByText('j = 0')).toBeInTheDocument()
+  })
+
+  it('moves the highlight to the swap line on the swap step', async () => {
+    const user = setup()
+    await user.click(screen.getByRole('button', { name: 'Next' }))
+    await user.click(screen.getByRole('button', { name: 'Next' }))
+    const current = document.querySelector('[aria-current="step"]')
+    expect(current).toHaveTextContent('[arr[j], arr[j + 1]] =')
   })
 
   it('offers a close button when onClose is given', async () => {
