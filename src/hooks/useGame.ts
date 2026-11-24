@@ -7,17 +7,26 @@ import {
 } from '../game/beTheAlgorithm'
 import { getBoardView } from '../game/boardView'
 import { getFallbackHint, getPrompt } from '../game/prompt'
-import { DEFAULT_LIVES, calculateStars } from '../game/scoring'
+import {
+  DEFAULT_LIVES,
+  DEFAULT_STAR_RULES,
+  calculateStars,
+  chargeHint,
+  type StarRules,
+} from '../game/scoring'
 import type { GameState, Move } from '../game/types'
 
 type Action =
   | { type: 'move'; move: Move; steps: readonly SortStep[] }
+  | { type: 'hint' }
   | { type: 'restart'; steps: readonly SortStep[]; lives: number }
 
 function reducer(state: GameState, action: Action): GameState {
   switch (action.type) {
     case 'move':
       return beTheAlgorithmReducer(state, action.move, action.steps)
+    case 'hint':
+      return chargeHint(state)
     case 'restart':
       return createInitialState(action.steps, action.lives)
   }
@@ -28,6 +37,7 @@ export function useGame(
   input: readonly number[],
   order: Order = 'asc',
   lives: number = DEFAULT_LIVES,
+  starRules: StarRules = DEFAULT_STAR_RULES,
 ) {
   const steps = useMemo(
     () => algorithm.run(input, { order }),
@@ -60,6 +70,8 @@ export function useGame(
     [steps],
   )
 
+  const spendHint = useCallback(() => dispatch({ type: 'hint' }), [])
+
   const restart = useCallback(() => {
     dispatch({ type: 'restart', steps, lives })
   }, [steps, lives])
@@ -74,8 +86,9 @@ export function useGame(
     vars: current?.vars,
     prompt,
     hint: getFallbackHint(algorithm.compareStyle, order),
-    stars: calculateStars(state.status, state.mistakes),
+    stars: calculateStars(state.status, state.mistakes, starRules),
     play,
+    spendHint,
     restart,
   }
 }

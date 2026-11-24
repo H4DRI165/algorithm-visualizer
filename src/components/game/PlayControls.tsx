@@ -1,4 +1,5 @@
 import type { PromptOption } from '../../game/prompt'
+import { HINT_COST } from '../../game/scoring'
 import type { Move } from '../../game/types'
 
 interface PlayControlsProps {
@@ -41,6 +42,9 @@ export function PlayControls({ options, onChoose, onHint }: PlayControlsProps) {
           className={`${buttonClass} border-slate-500 hover:bg-slate-700`}
         >
           Hint
+          <span className="text-xs font-normal opacity-70">
+            (-{HINT_COST} pts)
+          </span>
           <kbd aria-hidden="true" className="text-xs opacity-70">
             H
           </kbd>
