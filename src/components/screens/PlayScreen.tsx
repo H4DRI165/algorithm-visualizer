@@ -1,10 +1,21 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+  type ReactNode,
+} from 'react'
 import {
   bubbleSortAlgorithm,
   type SortingAlgorithm,
 } from '../../algorithms/registry'
 import type { Order } from '../../algorithms/types'
-import { DEFAULT_LIVES } from '../../game/scoring'
+import {
+  DEFAULT_LIVES,
+  DEFAULT_STAR_RULES,
+  type StarRules,
+  type Stars,
+} from '../../game/scoring'
 import { isTypingTarget } from '../../hooks/keyboard'
 import { useGame } from '../../hooks/useGame'
 import { Board } from '../board/Board'
@@ -15,12 +26,20 @@ import { PlayControls } from '../game/PlayControls'
 import { SplitLayout } from '../layout/SplitLayout'
 import { WatchScreen } from './WatchScreen'
 
+export interface GameResult {
+  stars: Stars
+  score: number
+}
+
 interface PlayScreenProps {
   title: string
   input: readonly number[]
   order?: Order
   lives?: number
   algorithm?: SortingAlgorithm
+  starRules?: StarRules
+  onComplete?: (result: GameResult) => void
+  endActions?: ReactNode
 }
 
 export function PlayScreen({
@@ -29,15 +48,25 @@ export function PlayScreen({
   order = 'asc',
   lives = DEFAULT_LIVES,
   algorithm = bubbleSortAlgorithm,
+  starRules = DEFAULT_STAR_RULES,
+  onComplete,
+  endActions,
 }: PlayScreenProps) {
-  const game = useGame(algorithm, input, order, lives)
+  const game = useGame(algorithm, input, order, lives, starRules)
   const { state, prompt, play, spendHint } = game
   const playing = state.status === 'playing'
   const options = prompt?.options
   const listing = useMemo(() => algorithm.listing(order), [algorithm, order])
 
+  const { status, score } = state
+  const { stars } = game
+  useEffect(() => {
+    if (status === 'won') onComplete?.({ stars, score })
+  }, [status, stars, score, onComplete])
+
   const [watchFrom, setWatchFrom] = useState<number | null>(null)
   const watching = watchFrom !== null
+
   const { cursor } = state
   const openHint = useCallback(() => {
     spendHint()
@@ -119,6 +148,7 @@ export function PlayScreen({
                   {'☆'.repeat(3 - game.stars)}
                 </span>
                 <div className="flex flex-wrap justify-center gap-3">
+                  {endActions}
                   <button
                     type="button"
                     onClick={game.restart}

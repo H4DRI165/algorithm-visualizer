@@ -7,7 +7,13 @@ import {
 } from '../game/beTheAlgorithm'
 import { getBoardView } from '../game/boardView'
 import { getFallbackHint, getPrompt } from '../game/prompt'
-import { DEFAULT_LIVES, calculateStars, chargeHint } from '../game/scoring'
+import {
+  DEFAULT_LIVES,
+  DEFAULT_STAR_RULES,
+  calculateStars,
+  chargeHint,
+  type StarRules,
+} from '../game/scoring'
 import type { GameState, Move } from '../game/types'
 
 type Action =
@@ -31,6 +37,7 @@ export function useGame(
   input: readonly number[],
   order: Order = 'asc',
   lives: number = DEFAULT_LIVES,
+  starRules: StarRules = DEFAULT_STAR_RULES,
 ) {
   const steps = useMemo(
     () => algorithm.run(input, { order }),
@@ -79,7 +86,7 @@ export function useGame(
     vars: current?.vars,
     prompt,
     hint: getFallbackHint(algorithm.compareStyle, order),
-    stars: calculateStars(state.status, state.mistakes),
+    stars: calculateStars(state.status, state.mistakes, starRules),
     play,
     spendHint,
     restart,
