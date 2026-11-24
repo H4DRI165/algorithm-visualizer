@@ -131,5 +131,38 @@ export const LEVELS: readonly LevelDef[] = [
     order: 'desc',
     lives: 4,
     stars: { two: 3, three: 1 },
+    unlocks: 'beat-1',
+  },
+  {
+    id: 'beat-1',
+    title: 'Beat Bubble Sort',
+    mode: 'beat-the-algorithm',
+    algorithmId: 'bubble-sort',
+    input: [4, 3, 1, 2],
+    order: 'asc',
+    lives: 3, // not used in free play
+    stars: { two: 2, three: 0 },
+    unlocks: 'beat-2',
+  },
+  {
+    id: 'beat-2',
+    title: 'Beat Selection Sort',
+    mode: 'beat-the-algorithm',
+    algorithmId: 'selection-sort',
+    input: [5, 2, 4, 1, 3],
+    order: 'asc',
+    lives: 3, // not used in free play
+    stars: { two: 1, three: 0 },
+    unlocks: 'beat-3',
+  },
+  {
+    id: 'beat-3',
+    title: 'Fewest Swaps',
+    mode: 'beat-the-algorithm',
+    algorithmId: 'selection-sort',
+    input: [3, 8, 1, 9, 4, 6, 2],
+    order: 'desc',
+    lives: 3, // not used in free play
+    stars: { two: 1, three: 0 },
   },
 ]
