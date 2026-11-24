@@ -50,7 +50,7 @@ describe('LevelMap', () => {
       screen.getByRole('button', { name: 'Level 2: Five Boxes, 1 of 3 stars' }),
     ).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /^Level 3:/ })).toBeEnabled()
-    expect(screen.getByText(/of 36/)).toHaveTextContent('Stars: 4 of 36')
+    expect(screen.getByText(/of 45/)).toHaveTextContent('Stars: 4 of 45')
   })
 
   it('selecting a level reports its id', async () => {

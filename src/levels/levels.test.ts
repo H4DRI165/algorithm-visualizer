@@ -1,6 +1,13 @@
 import { describe, expect, it } from 'vitest'
 import { getSortingAlgorithm } from '../algorithms/registry'
 import {
+  beatReducer,
+  countSwaps,
+  createBeatState,
+  extraSwaps,
+  perfectBeatClicks,
+} from '../game/beatTheAlgorithm'
+import {
   beTheAlgorithmReducer,
   createInitialState,
 } from '../game/beTheAlgorithm'
@@ -28,7 +35,9 @@ describe('level data', () => {
 
   it('only uses playable modes for now', () => {
     for (const level of LEVELS) {
-      expect(['be-the-algorithm', 'predict']).toContain(level.mode)
+      expect(['be-the-algorithm', 'predict', 'beat-the-algorithm']).toContain(
+        level.mode,
+      )
     }
   })
 })
@@ -54,6 +63,25 @@ describe.each(LEVELS)('level $id', (level) => {
     if (!algorithm) throw new Error('unknown algorithm')
 
     const steps = algorithm.run(level.input, { order: level.order })
+
+    if (level.mode === 'beat-the-algorithm') {
+      const pairs = perfectBeatClicks(steps)
+      expect(pairs.length).toBeGreaterThanOrEqual(3)
+
+      let beat = createBeatState(level.input, level.order)
+      for (const [a, b] of pairs) {
+        expect(beat.status).toBe('playing')
+        for (const index of [a, b]) {
+          beat = beatReducer(beat, { type: 'pick', index }, level.order)
+        }
+      }
+
+      expect(beat.status).toBe('won')
+      const extra = extraSwaps(beat.swaps, countSwaps(steps))
+      expect(calculateStars(beat.status, extra, level.stars)).toBe(3)
+      return
+    }
+
     const predict = level.mode === 'predict'
     const moves = predict ? perfectPredictMoves(steps) : perfectMoves(steps)
     expect(moves.length).toBeGreaterThanOrEqual(3)

@@ -1,7 +1,8 @@
 import { useCallback } from 'react'
 import { getSortingAlgorithm } from '../../algorithms/registry'
 import type { LevelDef } from '../../levels/types'
-import { PlayScreen, type GameResult } from './PlayScreen'
+import { BeatScreen } from './BeatScreen'
+import { PlayScreen } from './PlayScreen'
 import { PredictScreen } from './PredictScreen'
 
 interface LevelScreenProps {
@@ -21,8 +22,9 @@ export function LevelScreen({
   onSelectLevel,
   onBack,
 }: LevelScreenProps) {
+  // Every game mode reports at least its stars.
   const handleComplete = useCallback(
-    (result: GameResult) => onComplete(level.id, result.stars),
+    (result: { stars: number }) => onComplete(level.id, result.stars),
     [level.id, onComplete],
   )
 
@@ -50,6 +52,15 @@ export function LevelScreen({
     ),
   }
 
+  let game
+  if (level.mode === 'predict') {
+    game = <PredictScreen {...gameProps} />
+  } else if (level.mode === 'beat-the-algorithm') {
+    game = <BeatScreen {...gameProps} />
+  } else {
+    game = <PlayScreen {...gameProps} />
+  }
+
   return (
     <div className="flex w-full max-w-5xl flex-col items-start gap-4">
       <button
@@ -59,11 +70,7 @@ export function LevelScreen({
       >
         Back to map
       </button>
-      {level.mode === 'predict' ? (
-        <PredictScreen {...gameProps} />
-      ) : (
-        <PlayScreen {...gameProps} />
-      )}
+      {game}
     </div>
   )
 }
