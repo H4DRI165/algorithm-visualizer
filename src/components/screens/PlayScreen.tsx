@@ -31,7 +31,7 @@ export function PlayScreen({
   algorithm = bubbleSortAlgorithm,
 }: PlayScreenProps) {
   const game = useGame(algorithm, input, order, lives)
-  const { state, prompt, play } = game
+  const { state, prompt, play, spendHint } = game
   const playing = state.status === 'playing'
   const options = prompt?.options
   const listing = useMemo(() => algorithm.listing(order), [algorithm, order])
@@ -39,7 +39,10 @@ export function PlayScreen({
   const [watchFrom, setWatchFrom] = useState<number | null>(null)
   const watching = watchFrom !== null
   const { cursor } = state
-  const openHint = useCallback(() => setWatchFrom(cursor + 1), [cursor])
+  const openHint = useCallback(() => {
+    spendHint()
+    setWatchFrom(cursor + 1)
+  }, [spendHint, cursor])
 
   useEffect(() => {
     if (watching) return

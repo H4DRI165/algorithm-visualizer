@@ -35,3 +35,11 @@ export function calculateStars(
   if (mistakes <= rules.two) return 2
   return 1
 }
+
+export const HINT_COST = 5
+
+/** Opening a hint costs points, never lives or stars. Score stays at 0 or more. */
+export function chargeHint(state: GameState): GameState {
+  if (state.status !== 'playing') return state
+  return { ...state, score: Math.max(0, state.score - HINT_COST) }
+}

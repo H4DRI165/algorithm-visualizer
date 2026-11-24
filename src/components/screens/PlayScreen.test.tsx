@@ -87,7 +87,7 @@ describe('PlayScreen', () => {
     expect(screen.getByText('Step 3 of 7')).toBeInTheDocument()
 
     await user.click(screen.getByRole('button', { name: 'Back to game' }))
-    expect(screen.getByLabelText('Game stats')).toHaveTextContent('Score 10')
+    expect(screen.getByLabelText('Game stats')).toHaveTextContent('Score 5')
     expect(screen.getByLabelText('Box 2: 2, comparing')).toBeInTheDocument()
   })
 
