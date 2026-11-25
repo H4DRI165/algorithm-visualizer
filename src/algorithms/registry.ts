@@ -1,13 +1,17 @@
+import { listingByLang, type CodeListing, type Lang } from '../code/listing'
 import { getBubbleSortListing } from '../code/bubbleSort'
 import { getInsertionSortListing } from '../code/insertionSort'
 import { getSelectionSortListing } from '../code/selectionSort'
-import { listingByLang, type CodeListing, type Lang } from '../code/listing'
 import { getBubbleSortJavaListing } from '../code/java/bubbleSort'
 import { getInsertionSortJavaListing } from '../code/java/insertionSort'
 import { getSelectionSortJavaListing } from '../code/java/selectionSort'
 import { getBubbleSortPythonListing } from '../code/python/bubbleSort'
 import { getInsertionSortPythonListing } from '../code/python/insertionSort'
 import { getSelectionSortPythonListing } from '../code/python/selectionSort'
+import { bubbleSort } from './sorting/bubbleSort'
+import { insertionSort } from './sorting/insertionSort'
+import { selectionSort } from './sorting/selectionSort'
+import type { AlgorithmDef, CompareStyle, Order, SortStep } from './types'
 
 export interface SortingAlgorithm extends AlgorithmDef<
   readonly number[],

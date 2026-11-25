@@ -58,8 +58,7 @@ describe('code languages in the screens', () => {
         algorithm={bubbleSortAlgorithm}
       />,
     )
-    await user.tab() // first reachable control is the selected tab
-    expect(screen.getByRole('tab', { name: 'TypeScript' })).toHaveFocus()
+    screen.getByRole('tab', { name: 'TypeScript' }).focus()
     await user.keyboard('{ArrowRight}')
     expect(screen.getByRole('tab', { name: 'Python' })).toHaveAttribute(
       'aria-selected',

@@ -21,6 +21,7 @@ import { WatchScreen } from './WatchScreen'
 import type { GameResult } from './PlayScreen'
 import { useGameSounds } from '../../hooks/useGameSounds'
 import { useListing } from '../../hooks/useListing'
+import { AboutPanel } from '../learn/AboutPanel'
 
 interface PredictScreenProps {
   title: string
@@ -173,6 +174,7 @@ export function PredictScreen({
           <CodeView listing={listing} anchor={game.anchor} vars={game.vars} />
         }
       />
+      <AboutPanel algorithm={algorithm} />
     </section>
   )
 }
