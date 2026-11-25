@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type ReactNode } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
 import {
   bubbleSortAlgorithm,
   type SortingAlgorithm,
@@ -14,6 +14,7 @@ import { useBeatGame } from '../../hooks/useBeatGame'
 import { PickBoard } from '../board/PickBoard'
 import { Feedback } from '../game/Feedback'
 import { WatchScreen } from './WatchScreen'
+import { useListing } from '../../hooks/useListing'
 
 interface BeatScreenProps {
   title: string
@@ -37,7 +38,7 @@ export function BeatScreen({
   const game = useBeatGame(algorithm, input, order, starRules)
   const { state, stars } = game
   const playing = state.status === 'playing'
-  const listing = useMemo(() => algorithm.listing(order), [algorithm, order])
+  const listing = useListing(algorithm, order)
 
   const { status } = state
   useEffect(() => {
