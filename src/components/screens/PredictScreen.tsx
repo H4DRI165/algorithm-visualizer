@@ -25,6 +25,7 @@ import { PredictCards } from '../game/PredictCards'
 import { SplitLayout } from '../layout/SplitLayout'
 import { WatchScreen } from './WatchScreen'
 import type { GameResult } from './PlayScreen'
+import { useGameSounds } from '../../hooks/useGameSounds'
 
 interface PredictScreenProps {
   title: string
@@ -52,6 +53,7 @@ export function PredictScreen({
 }: PredictScreenProps) {
   const game = usePredictGame(algorithm, input, order, lives, starRules)
   const { state, prompt, play, spendHint } = game
+  useGameSounds(state.lastResult, state.status)
   const playing = state.status === 'playing'
   const options = prompt?.options
   const listing = useMemo(() => algorithm.listing(order), [algorithm, order])

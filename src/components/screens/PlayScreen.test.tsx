@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it } from 'vitest'
 import { PlayScreen } from './PlayScreen'
@@ -126,5 +126,30 @@ describe('PlayScreen', () => {
     await keep()
     await user.click(screen.getByRole('button', { name: /watch replay/i }))
     expect(screen.getByText('Step 0 of 7')).toBeInTheDocument()
+  })
+
+  it('flashes the swap line after a correct swap, then fades', async () => {
+    const { swap } = setup()
+    await swap()
+    expect(document.querySelector('[data-flash="true"]')).toHaveTextContent(
+      '[arr[j], arr[j + 1]] =',
+    )
+    // The compare line keeps the normal highlight.
+    expect(document.querySelector('[aria-current="step"]')).toHaveTextContent(
+      'if (arr[j] > arr[j + 1])',
+    )
+    await waitFor(
+      () => expect(document.querySelector('[data-flash]')).toBeNull(),
+      { timeout: 2000 },
+    )
+  })
+
+  it('does not flash after a wrong move or a keep', async () => {
+    const { swap, keep } = setup()
+    await keep() // wrong
+    expect(document.querySelector('[data-flash]')).toBeNull()
+    await swap()
+    await keep() // correct keep
+    expect(document.querySelector('[data-flash]')).toBeNull()
   })
 })

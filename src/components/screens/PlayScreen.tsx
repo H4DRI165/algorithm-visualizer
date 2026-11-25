@@ -25,6 +25,8 @@ import { Hud } from '../game/Hud'
 import { PlayControls } from '../game/PlayControls'
 import { SplitLayout } from '../layout/SplitLayout'
 import { WatchScreen } from './WatchScreen'
+import { useFlashAnchor } from '../../hooks/useFlashAnchor'
+import { useGameSounds } from '../../hooks/useGameSounds'
 
 export interface GameResult {
   stars: Stars
@@ -54,6 +56,8 @@ export function PlayScreen({
 }: PlayScreenProps) {
   const game = useGame(algorithm, input, order, lives, starRules)
   const { state, prompt, play, spendHint } = game
+  const flashAnchor = useFlashAnchor(game.steps, state.cursor)
+  useGameSounds(state.lastResult, state.status)
   const playing = state.status === 'playing'
   const options = prompt?.options
   const listing = useMemo(() => algorithm.listing(order), [algorithm, order])
@@ -171,7 +175,12 @@ export function PlayScreen({
           </>
         }
         code={
-          <CodeView listing={listing} anchor={game.anchor} vars={game.vars} />
+          <CodeView
+            listing={listing}
+            anchor={game.anchor}
+            flashAnchor={flashAnchor}
+            vars={game.vars}
+          />
         }
       />
     </section>

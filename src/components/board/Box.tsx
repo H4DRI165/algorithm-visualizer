@@ -18,7 +18,7 @@ export function Box({ value, position, state = 'idle' }: BoxProps) {
       className="flex flex-col items-center gap-1"
     >
       <div
-        className={`flex h-16 w-16 flex-col items-center justify-center rounded-lg border-2 transition-colors ${BOX_STATE_CLASSES[state]}`}
+        className={`flex h-16 w-16 flex-col items-center justify-center rounded-lg border-2 transition-colors animate-pop motion-reduce:animate-none ${BOX_STATE_CLASSES[state]}`}
       >
         <span className="text-xl font-bold">{value}</span>
         <span className="h-3 text-[10px] leading-3 opacity-80">

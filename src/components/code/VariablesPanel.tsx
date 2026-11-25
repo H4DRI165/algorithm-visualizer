@@ -12,7 +12,7 @@ export function VariablesPanel({ vars }: VariablesPanelProps) {
     >
       <h3 className="mb-1 text-sm font-semibold text-slate-300">Variables</h3>
       {entries.length === 0 ? (
-        <p className="font-mono text-sm text-slate-500">none yet</p>
+        <p className="font-mono text-sm text-slate-400">none yet</p>
       ) : (
         <ul className="flex flex-wrap gap-x-4 gap-y-1 font-mono text-sm text-slate-100">
           {entries.map(([name, value]) => (

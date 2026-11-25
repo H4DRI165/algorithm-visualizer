@@ -3,9 +3,17 @@ import { useId, useState } from 'react'
 interface CodePanelProps {
   lines: readonly string[]
   activeLine?: number
+  /** A line that lights up briefly, such as the swap after a correct swap. */
+  flashLine?: number
 }
 
-export function CodePanel({ lines, activeLine }: CodePanelProps) {
+function lineClass(active: boolean, flash: boolean): string {
+  if (active) return 'border-sky-400 bg-sky-500/20 text-sky-100'
+  if (flash) return 'border-amber-400 bg-amber-500/30 text-amber-100'
+  return 'border-transparent text-slate-300'
+}
+
+export function CodePanel({ lines, activeLine, flashLine }: CodePanelProps) {
   const [open, setOpen] = useState(true)
   const listId = useId()
 
@@ -36,19 +44,17 @@ export function CodePanel({ lines, activeLine }: CodePanelProps) {
           {lines.map((line, i) => {
             const n = i + 1
             const active = n === activeLine
+            const flash = n === flashLine && !active
             return (
               <li
                 key={n}
                 aria-current={active ? 'step' : undefined}
-                className={`flex gap-2 border-l-4 px-2 ${
-                  active
-                    ? 'border-sky-400 bg-sky-500/20 text-sky-100'
-                    : 'border-transparent text-slate-300'
-                }`}
+                data-flash={flash ? 'true' : undefined}
+                className={`flex gap-2 border-l-4 px-2 transition-colors ${lineClass(active, flash)}`}
               >
                 <span
                   aria-hidden="true"
-                  className="w-5 shrink-0 select-none text-right text-slate-500"
+                  className="w-5 shrink-0 select-none text-right text-slate-400"
                 >
                   {n}
                 </span>

@@ -1,23 +1,45 @@
 import { useState } from 'react'
+import { getSortingAlgorithm } from './algorithms/registry'
+import { SoundToggle } from './components/game/SoundToggle'
 import { ArcadeScreen } from './components/screens/ArcadeScreen'
+import { ChallengeScreen } from './components/screens/ChallengeScreen'
 import { LevelMap } from './components/screens/LevelMap'
 import { LevelScreen } from './components/screens/LevelScreen'
 import { PracticeScreen } from './components/screens/PracticeScreen'
 import { useProgress } from './hooks/useProgress'
 import { LEVELS } from './levels/levels'
 import { isUnlocked } from './levels/progress'
+import { parseShareHash, type ShareState } from './schemas/share'
 
 type Screen =
   | { name: 'map' }
   | { name: 'practice' }
   | { name: 'arcade' }
+  | { name: 'challenge'; share: ShareState }
   | { name: 'level'; levelId: string }
 
+/** A valid shared link opens its challenge. Anything else opens the map. */
+function initialScreen(): Screen {
+  const share = parseShareHash(window.location.hash)
+  return share && getSortingAlgorithm(share.algo)
+    ? { name: 'challenge', share }
+    : { name: 'map' }
+}
+
 export default function App() {
-  const [screen, setScreen] = useState<Screen>({ name: 'map' })
+  const [screen, setScreen] = useState<Screen>(initialScreen)
   const { progress, record, recordArcade, reset } = useProgress()
 
-  const goToMap = () => setScreen({ name: 'map' })
+  const goToMap = () => {
+    if (window.location.hash) {
+      window.history.replaceState(
+        null,
+        '',
+        window.location.pathname + window.location.search,
+      )
+    }
+    setScreen({ name: 'map' })
+  }
 
   const level =
     screen.name === 'level'
@@ -25,7 +47,9 @@ export default function App() {
       : undefined
 
   let content
-  if (screen.name === 'practice') {
+  if (screen.name === 'challenge') {
+    content = <ChallengeScreen share={screen.share} onBack={goToMap} />
+  } else if (screen.name === 'practice') {
     content = <PracticeScreen onBack={goToMap} />
   } else if (screen.name === 'arcade') {
     content = (
@@ -65,8 +89,29 @@ export default function App() {
 
   return (
     <main className="flex min-h-screen flex-col items-center gap-8 bg-slate-900 px-4 py-10 text-slate-100">
-      <h1 className="text-3xl font-bold">Algorithm Visualizer</h1>
-      {content}
+      <a
+        href="#content"
+        onClick={(e) => {
+          e.preventDefault()
+          document.getElementById('content')?.focus()
+        }}
+        className="sr-only focus:not-sr-only focus:rounded-md focus:border focus:border-sky-400 focus:px-3 focus:py-1"
+      >
+        Skip to content
+      </a>
+
+      <div className="flex w-full max-w-5xl items-center justify-between gap-4">
+        <h1 className="text-3xl font-bold">Algorithm Visualizer</h1>
+        <SoundToggle />
+      </div>
+
+      <div
+        id="content"
+        tabIndex={-1}
+        className="flex w-full flex-col items-center gap-8 outline-none"
+      >
+        {content}
+      </div>
     </main>
   )
 }

@@ -3,6 +3,7 @@ import { getSortingAlgorithm } from '../../algorithms/registry'
 import { getStars, isUnlocked, totalStars } from '../../levels/progress'
 import type { LevelDef } from '../../levels/types'
 import type { Progress } from '../../schemas/progress'
+import { BADGES, earnedBadgeIds } from '../../levels/badges'
 
 interface LevelMapProps {
   levels: readonly LevelDef[]
@@ -25,6 +26,7 @@ export function LevelMap({
   onResetProgress,
 }: LevelMapProps) {
   const [confirming, setConfirming] = useState(false)
+  const earned = new Set(earnedBadgeIds(progress, levels))
 
   return (
     <section
@@ -92,6 +94,31 @@ export function LevelMap({
           )
         })}
       </ol>
+
+      <section aria-label="Badges" className="flex flex-col gap-2">
+        <h3 className="text-sm font-semibold text-slate-300">Badges</h3>
+        <ul className="flex flex-wrap gap-2">
+          {BADGES.map((badge) => {
+            const has = earned.has(badge.id)
+            return (
+              <li
+                key={badge.id}
+                title={badge.description}
+                className={`rounded-md border px-3 py-1 text-xs ${
+                  has
+                    ? 'border-amber-400 bg-amber-500/20 text-amber-100'
+                    : 'border-slate-700 text-slate-400'
+                }`}
+              >
+                {`${has ? '★ ' : ''}${badge.name}`}
+                <span className="sr-only">
+                  {has ? ' (earned)' : ` (locked: ${badge.description})`}
+                </span>
+              </li>
+            )
+          })}
+        </ul>
+      </section>
 
       <div className="flex flex-wrap items-center gap-3">
         <button type="button" className={smallButton} onClick={onPractice}>
