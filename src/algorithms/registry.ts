@@ -1,11 +1,13 @@
 import { getBubbleSortListing } from '../code/bubbleSort'
 import { getInsertionSortListing } from '../code/insertionSort'
-import type { CodeListing } from '../code/listing'
 import { getSelectionSortListing } from '../code/selectionSort'
-import { bubbleSort } from './sorting/bubbleSort'
-import { insertionSort } from './sorting/insertionSort'
-import { selectionSort } from './sorting/selectionSort'
-import type { AlgorithmDef, CompareStyle, Order, SortStep } from './types'
+import { listingByLang, type CodeListing, type Lang } from '../code/listing'
+import { getBubbleSortJavaListing } from '../code/java/bubbleSort'
+import { getInsertionSortJavaListing } from '../code/java/insertionSort'
+import { getSelectionSortJavaListing } from '../code/java/selectionSort'
+import { getBubbleSortPythonListing } from '../code/python/bubbleSort'
+import { getInsertionSortPythonListing } from '../code/python/insertionSort'
+import { getSelectionSortPythonListing } from '../code/python/selectionSort'
 
 export interface SortingAlgorithm extends AlgorithmDef<
   readonly number[],
@@ -13,7 +15,7 @@ export interface SortingAlgorithm extends AlgorithmDef<
 > {
   category: 'sorting'
   compareStyle: CompareStyle
-  listing: (order: Order) => CodeListing
+  listing: (order: Order, lang?: Lang) => CodeListing
 }
 
 export const bubbleSortAlgorithm: SortingAlgorithm = {
@@ -28,7 +30,11 @@ export const bubbleSortAlgorithm: SortingAlgorithm = {
   },
   compareStyle: 'swap',
   run: bubbleSort,
-  listing: getBubbleSortListing,
+  listing: listingByLang({
+    ts: getBubbleSortListing,
+    python: getBubbleSortPythonListing,
+    java: getBubbleSortJavaListing,
+  }),
   explanation: {
     summary:
       'Bubble sort walks along the row again and again. Each time it looks at two neighbours and, if they are in the wrong order, makes them trade places. After every pass, the biggest box that is not yet sorted has bubbled up to its final place.',
@@ -51,7 +57,11 @@ export const selectionSortAlgorithm: SortingAlgorithm = {
   },
   compareStyle: 'smallest',
   run: selectionSort,
-  listing: getSelectionSortListing,
+  listing: listingByLang({
+    ts: getSelectionSortListing,
+    python: getSelectionSortPythonListing,
+    java: getSelectionSortJavaListing,
+  }),
   explanation: {
     summary:
       'Selection sort scans the part of the row that is not sorted yet and finds the smallest box. It moves that box into the first open place with one swap, then repeats for the next place.',
@@ -74,7 +84,11 @@ export const insertionSortAlgorithm: SortingAlgorithm = {
   },
   compareStyle: 'swap',
   run: insertionSort,
-  listing: getInsertionSortListing,
+  listing: listingByLang({
+    ts: getInsertionSortListing,
+    python: getInsertionSortPythonListing,
+    java: getInsertionSortJavaListing,
+  }),
   explanation: {
     summary:
       'Insertion sort grows a sorted group on the left. It takes the next box and slides it left, past every box that is out of order, until it fits.',

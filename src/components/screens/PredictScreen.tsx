@@ -1,10 +1,4 @@
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-  type ReactNode,
-} from 'react'
+import { useCallback, useEffect, useState, type ReactNode } from 'react'
 import {
   bubbleSortAlgorithm,
   type SortingAlgorithm,
@@ -26,6 +20,7 @@ import { SplitLayout } from '../layout/SplitLayout'
 import { WatchScreen } from './WatchScreen'
 import type { GameResult } from './PlayScreen'
 import { useGameSounds } from '../../hooks/useGameSounds'
+import { useListing } from '../../hooks/useListing'
 
 interface PredictScreenProps {
   title: string
@@ -56,7 +51,7 @@ export function PredictScreen({
   useGameSounds(state.lastResult, state.status)
   const playing = state.status === 'playing'
   const options = prompt?.options
-  const listing = useMemo(() => algorithm.listing(order), [algorithm, order])
+  const listing = useListing(algorithm, order)
 
   const { status, score } = state
   const { stars } = game

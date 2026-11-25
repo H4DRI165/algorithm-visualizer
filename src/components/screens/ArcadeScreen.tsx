@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { roundBonus, type ArcadeRound } from '../../game/arcade'
 import type { Rng } from '../../game/presets'
 import { DEFAULT_LIVES } from '../../game/scoring'
@@ -10,6 +10,7 @@ import { Feedback } from '../game/Feedback'
 import { PlayControls } from '../game/PlayControls'
 import { SplitLayout } from '../layout/SplitLayout'
 import { useGameSounds } from '../../hooks/useGameSounds'
+import { useListing } from '../../hooks/useListing'
 
 interface ArcadeScreenProps {
   /** Best score saved so far. */
@@ -41,10 +42,7 @@ export function ArcadeScreen({
   useGameSounds(run.lastResult, run.status)
   //const playing = status === 'playing'
   const options = prompt?.options
-  const listing = useMemo(
-    () => algorithm.listing(round.order),
-    [algorithm, round.order],
-  )
+  const listing = useListing(algorithm, round.order) // ArcadeScreen only
 
   // The saved best changes the moment the run ends, so remember the old one.
   const [baseline, setBaseline] = useState(bestScore)
