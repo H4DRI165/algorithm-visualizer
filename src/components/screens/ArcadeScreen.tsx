@@ -9,6 +9,7 @@ import { CodeView } from '../code/CodeView'
 import { Feedback } from '../game/Feedback'
 import { PlayControls } from '../game/PlayControls'
 import { SplitLayout } from '../layout/SplitLayout'
+import { useGameSounds } from '../../hooks/useGameSounds'
 
 interface ArcadeScreenProps {
   /** Best score saved so far. */
@@ -37,6 +38,7 @@ export function ArcadeScreen({
   const game = useArcadeGame(rng, firstRound)
   const { state, round, algorithm, status, prompt, play } = game
   const run = state.game
+  useGameSounds(run.lastResult, run.status)
   //const playing = status === 'playing'
   const options = prompt?.options
   const listing = useMemo(

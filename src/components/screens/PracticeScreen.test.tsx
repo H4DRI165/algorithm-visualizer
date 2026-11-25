@@ -50,4 +50,17 @@ describe('PracticeScreen', () => {
     await user.click(screen.getByRole('button', { name: 'Back to map' }))
     expect(onBack).toHaveBeenCalledOnce()
   })
+
+  it('builds a challenge link for the current puzzle', async () => {
+    const { user } = setup()
+    await user.selectOptions(screen.getByLabelText('Challenge mode'), 'predict')
+    await user.click(
+      screen.getByRole('button', { name: 'Copy challenge link' }),
+    )
+    await screen.findByRole('status')
+    const input = screen.getByLabelText('Challenge link') as HTMLInputElement
+    expect(input.value).toContain(
+      '#algo=bubble-sort&order=asc&mode=predict&values=',
+    )
+  })
 })

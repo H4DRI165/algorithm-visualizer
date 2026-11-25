@@ -14,7 +14,12 @@ export function Board({ values, states = [] }: BoardProps) {
       className="flex flex-wrap justify-center gap-3"
     >
       {values.map((value, i) => (
-        <Box key={i} value={value} position={i} state={states[i] ?? 'idle'} />
+        <Box
+          key={`${i}-${value}`}
+          value={value}
+          position={i}
+          state={states[i] ?? 'idle'}
+        />
       ))}
     </div>
   )

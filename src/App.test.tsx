@@ -117,4 +117,53 @@ describe('App', () => {
     await user.click(screen.getByRole('button', { name: 'Yes, reset' }))
     expect(screen.getByRole('button', { name: /^Level 2:/ })).toBeDisabled()
   })
+
+  it('opens a shared challenge from the link and clears it on exit', async () => {
+    const user = userEvent.setup()
+    window.location.hash =
+      '#algo=bubble-sort&order=asc&mode=be-the-algorithm&values=2,1,3'
+    try {
+      render(<App />)
+      expect(
+        screen.getByRole('heading', { name: 'Challenge: Bubble Sort' }),
+      ).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: /^swap/i })).toBeInTheDocument()
+
+      await user.click(screen.getByRole('button', { name: 'Back to map' }))
+      expect(
+        screen.getByRole('heading', { name: 'Choose a level' }),
+      ).toBeInTheDocument()
+      expect(window.location.hash).toBe('')
+    } finally {
+      window.location.hash = ''
+    }
+  })
+
+  it('ignores broken or unknown challenge links', () => {
+    for (const hash of [
+      '#algo=bubble-sort&order=asc&mode=predict&values=1',
+      '#algo=nope&order=asc&mode=predict&values=3,1,2',
+    ]) {
+      window.location.hash = hash
+      try {
+        const { unmount } = render(<App />)
+        expect(
+          screen.getByRole('heading', { name: 'Choose a level' }),
+        ).toBeInTheDocument()
+        unmount()
+      } finally {
+        window.location.hash = ''
+      }
+    }
+  })
+
+  it('has a skip link and a sound toggle that starts off', () => {
+    render(<App />)
+    expect(
+      screen.getByRole('link', { name: 'Skip to content' }),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole('button', { name: 'Sound effects' }),
+    ).toHaveAttribute('aria-pressed', 'false')
+  })
 })

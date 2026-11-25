@@ -108,6 +108,14 @@ describe('LevelMap', () => {
     await user.click(screen.getByRole('button', { name: 'Cancel' }))
     expect(onResetProgress).not.toHaveBeenCalled()
   })
+
+  it('shows earned and locked badges', () => {
+    setup(recordStars(emptyProgress(), 'bubble-1', 3))
+    const badges = screen.getByRole('region', { name: 'Badges' })
+    expect(badges).toHaveTextContent('★ First Win (earned)')
+    expect(badges).toHaveTextContent('★ Perfect Run (earned)')
+    expect(badges).toHaveTextContent('Race Winner (locked')
+  })
 })
 
 function within_list() {

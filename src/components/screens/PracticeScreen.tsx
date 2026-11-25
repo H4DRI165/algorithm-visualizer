@@ -7,6 +7,7 @@ import {
 import type { Order } from '../../algorithms/types'
 import { PRESETS, makePreset, type PresetId } from '../../game/presets'
 import { MAX_BOXES, MIN_BOXES } from '../../schemas/boxes'
+import { encodeShare, type ShareMode } from '../../schemas/share'
 import { PlayScreen } from './PlayScreen'
 
 interface Setup {
@@ -26,6 +27,12 @@ const SIZES = Array.from(
   { length: MAX_BOXES - MIN_BOXES + 1 },
   (_, i) => MIN_BOXES + i,
 )
+
+const SHARE_MODES: { id: ShareMode; label: string }[] = [
+  { id: 'be-the-algorithm', label: 'Be the algorithm' },
+  { id: 'predict', label: 'Predict' },
+  { id: 'beat-the-algorithm', label: 'Beat the algorithm' },
+]
 
 const INITIAL_SETUP: Setup = {
   algorithmId: bubbleSortAlgorithm.id,
@@ -54,12 +61,37 @@ interface PracticeScreenProps {
 
 export function PracticeScreen({ onBack }: PracticeScreenProps) {
   const [puzzle, setPuzzle] = useState(() => createPuzzle(INITIAL_SETUP, 0))
+  const [shareMode, setShareMode] = useState<ShareMode>('be-the-algorithm')
+  const [link, setLink] = useState<string | null>(null)
+  // null = not tried yet, true = copied, false = copy it by hand
+  const [copied, setCopied] = useState<boolean | null>(null)
+
   const { setup } = puzzle
   const algorithm =
     getSortingAlgorithm(setup.algorithmId) ?? bubbleSortAlgorithm
 
   function update(patch: Partial<Setup>) {
     setPuzzle(createPuzzle({ ...setup, ...patch }, puzzle.round + 1))
+    setLink(null)
+    setCopied(null)
+  }
+
+  async function shareChallenge() {
+    const url = `${window.location.origin}${window.location.pathname}${encodeShare(
+      {
+        algo: setup.algorithmId,
+        values: puzzle.input,
+        order: setup.order,
+        mode: shareMode,
+      },
+    )}`
+    setLink(url)
+    try {
+      await navigator.clipboard.writeText(url)
+      setCopied(true)
+    } catch {
+      setCopied(false)
+    }
   }
 
   return (
@@ -143,6 +175,60 @@ export function PracticeScreen({ onBack }: PracticeScreenProps) {
         >
           New puzzle
         </button>
+      </section>
+
+      <section
+        aria-label="Share this puzzle"
+        className="flex w-full max-w-3xl flex-col items-center gap-3"
+      >
+        <div className="flex flex-wrap items-end justify-center gap-4">
+          <label className={labelClass}>
+            Challenge mode
+            <select
+              value={shareMode}
+              onChange={(e) => {
+                const found = SHARE_MODES.find((m) => m.id === e.target.value)
+                if (found) {
+                  setShareMode(found.id)
+                  setLink(null)
+                  setCopied(null)
+                }
+              }}
+              className={selectClass}
+            >
+              {SHARE_MODES.map((m) => (
+                <option key={m.id} value={m.id}>
+                  {m.label}
+                </option>
+              ))}
+            </select>
+          </label>
+          <button
+            type="button"
+            onClick={() => void shareChallenge()}
+            className={buttonClass}
+          >
+            Copy challenge link
+          </button>
+        </div>
+
+        {link !== null && (
+          <input
+            type="text"
+            readOnly
+            aria-label="Challenge link"
+            value={link}
+            onFocus={(e) => e.currentTarget.select()}
+            className="w-full rounded-md border border-slate-600 bg-slate-800 px-2 py-1 text-sm text-slate-100 focus:outline-2 focus:outline-sky-400"
+          />
+        )}
+        {copied !== null && (
+          <p role="status" className="text-sm text-slate-300">
+            {copied
+              ? 'Link copied to the clipboard.'
+              : 'Copy the link from the box above.'}
+          </p>
+        )}
       </section>
 
       <PlayScreen
