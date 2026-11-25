@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import {
   emptyProgress,
   loadProgress,
+  recordArcadeScore,
   recordStars,
   saveProgress,
 } from '../levels/progress'
@@ -19,7 +20,11 @@ export function useProgress() {
     setProgress((p) => recordStars(p, levelId, stars))
   }, [])
 
+  const recordArcade = useCallback((score: number) => {
+    setProgress((p) => recordArcadeScore(p, score))
+  }, [])
+
   const reset = useCallback(() => setProgress(emptyProgress()), [])
 
-  return { progress, record, reset }
+  return { progress, record, recordArcade, reset }
 }

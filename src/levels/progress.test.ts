@@ -8,6 +8,7 @@ import {
   isUnlocked,
   loadProgress,
   parseProgress,
+  recordArcadeScore,
   recordStars,
   saveProgress,
   totalStars,
@@ -82,6 +83,34 @@ describe('recordStars and getStars', () => {
     progress = recordStars(progress, 'bubble-2', 2)
     progress = recordStars(progress, 'not-a-level', 3)
     expect(totalStars(progress, LEVELS)).toBe(5)
+  })
+})
+
+describe('recordArcadeScore', () => {
+  it('records a higher score without mutating the old progress', () => {
+    const before = emptyProgress()
+    const after = recordArcadeScore(before, 120)
+    expect(after.bestArcadeScore).toBe(120)
+    expect(before.bestArcadeScore).toBe(0)
+  })
+
+  it('keeps the best score', () => {
+    const best = recordArcadeScore(emptyProgress(), 120)
+    expect(recordArcadeScore(best, 80)).toBe(best)
+    expect(recordArcadeScore(best, 120)).toBe(best)
+  })
+
+  it('ignores zero, negative and invalid scores, and rounds down', () => {
+    const empty = emptyProgress()
+    expect(recordArcadeScore(empty, 0)).toBe(empty)
+    expect(recordArcadeScore(empty, -5)).toBe(empty)
+    expect(recordArcadeScore(empty, Number.NaN)).toBe(empty)
+    expect(recordArcadeScore(empty, 10.9).bestArcadeScore).toBe(10)
+  })
+
+  it('keeps the stars when it records a score', () => {
+    const withStars = recordStars(emptyProgress(), 'bubble-1', 2)
+    expect(recordArcadeScore(withStars, 40).stars).toEqual({ 'bubble-1': 2 })
   })
 })
 

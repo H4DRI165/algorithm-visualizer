@@ -9,6 +9,7 @@ interface LevelMapProps {
   progress: Progress
   onSelect: (levelId: string) => void
   onPractice: () => void
+  onArcade: () => void
   onResetProgress: () => void
 }
 
@@ -20,6 +21,7 @@ export function LevelMap({
   progress,
   onSelect,
   onPractice,
+  onArcade,
   onResetProgress,
 }: LevelMapProps) {
   const [confirming, setConfirming] = useState(false)
@@ -94,6 +96,9 @@ export function LevelMap({
       <div className="flex flex-wrap items-center gap-3">
         <button type="button" className={smallButton} onClick={onPractice}>
           Free practice
+        </button>
+        <button type="button" className={smallButton} onClick={onArcade}>
+          {`Arcade (best ${progress.bestArcadeScore})`}
         </button>
 
         {confirming ? (

@@ -73,3 +73,11 @@ export function isUnlocked(
     (l) => l.unlocks === levelId && getStars(progress, l.id) >= 1,
   )
 }
+
+/** Keeps the best Arcade score. Returns the same object when nothing improves. */
+export function recordArcadeScore(progress: Progress, score: number): Progress {
+  if (!Number.isFinite(score)) return progress
+  const value = Math.floor(score)
+  if (value <= progress.bestArcadeScore) return progress
+  return { ...progress, bestArcadeScore: value }
+}

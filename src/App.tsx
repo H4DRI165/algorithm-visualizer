@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { ArcadeScreen } from './components/screens/ArcadeScreen'
 import { LevelMap } from './components/screens/LevelMap'
 import { LevelScreen } from './components/screens/LevelScreen'
 import { PracticeScreen } from './components/screens/PracticeScreen'
@@ -7,11 +8,14 @@ import { LEVELS } from './levels/levels'
 import { isUnlocked } from './levels/progress'
 
 type Screen =
-  { name: 'map' } | { name: 'practice' } | { name: 'level'; levelId: string }
+  | { name: 'map' }
+  | { name: 'practice' }
+  | { name: 'arcade' }
+  | { name: 'level'; levelId: string }
 
 export default function App() {
   const [screen, setScreen] = useState<Screen>({ name: 'map' })
-  const { progress, record, reset } = useProgress()
+  const { progress, record, recordArcade, reset } = useProgress()
 
   const goToMap = () => setScreen({ name: 'map' })
 
@@ -23,6 +27,14 @@ export default function App() {
   let content
   if (screen.name === 'practice') {
     content = <PracticeScreen onBack={goToMap} />
+  } else if (screen.name === 'arcade') {
+    content = (
+      <ArcadeScreen
+        bestScore={progress.bestArcadeScore}
+        onGameOver={recordArcade}
+        onBack={goToMap}
+      />
+    )
   } else if (level && isUnlocked(LEVELS, progress, level.id)) {
     const next = LEVELS.find((l) => l.id === level.unlocks)
     content = (
@@ -45,6 +57,7 @@ export default function App() {
         progress={progress}
         onSelect={(levelId) => setScreen({ name: 'level', levelId })}
         onPractice={() => setScreen({ name: 'practice' })}
+        onArcade={() => setScreen({ name: 'arcade' })}
         onResetProgress={reset}
       />
     )
