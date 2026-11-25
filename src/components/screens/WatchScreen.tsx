@@ -1,4 +1,5 @@
 import { useEffect, useMemo } from 'react'
+import type { SortingAlgorithm } from '../../algorithms/registry'
 import type { SortStep } from '../../algorithms/types'
 import type { CodeListing } from '../../code/listing'
 import { getWatchView } from '../../game/watchView'
@@ -7,12 +8,15 @@ import { SPEEDS, usePlayback } from '../../hooks/usePlayback'
 import { Board } from '../board/Board'
 import { CodeView } from '../code/CodeView'
 import { SplitLayout } from '../layout/SplitLayout'
+import { AboutPanel } from '../learn/AboutPanel'
+import { StepLog } from '../learn/StepLog'
 
 interface WatchScreenProps {
   title: string
   input: readonly number[]
   steps: readonly SortStep[]
   listing: CodeListing
+  algorithm?: SortingAlgorithm
   startAt?: number
   onClose?: () => void
   closeLabel?: string
@@ -26,6 +30,7 @@ export function WatchScreen({
   input,
   steps,
   listing,
+  algorithm,
   startAt = 0,
   onClose,
   closeLabel = 'Close',
@@ -172,6 +177,12 @@ export function WatchScreen({
           />
         }
       />
+
+      {/* After the split layout, so the code line stays the first aria-current. */}
+      <div className="grid gap-6 lg:grid-cols-2 lg:items-start">
+        <StepLog steps={steps} position={position} onSeek={playback.seek} />
+        {algorithm && <AboutPanel algorithm={algorithm} defaultOpen />}
+      </div>
     </section>
   )
 }
