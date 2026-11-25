@@ -47,6 +47,12 @@ export function LevelMap({
           const stars = getStars(progress, level.id)
           const algorithmName =
             getSortingAlgorithm(level.algorithmId)?.name ?? level.algorithmId
+          const rivalName = level.rivalId
+            ? (getSortingAlgorithm(level.rivalId)?.name ?? level.rivalId)
+            : undefined
+          const matchup = rivalName
+            ? `${algorithmName} vs ${rivalName}`
+            : algorithmName
           return (
             <li key={level.id}>
               <button
@@ -65,7 +71,7 @@ export function LevelMap({
                   {level.title}
                 </span>
                 <span aria-hidden="true" className="text-sm text-slate-300">
-                  {algorithmName} ·{' '}
+                  {matchup} ·{' '}
                   {level.order === 'asc' ? 'Ascending' : 'Descending'} ·{' '}
                   {level.input.length} boxes
                 </span>

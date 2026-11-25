@@ -17,6 +17,12 @@ import {
   perfectPredictMoves,
   predictReducer,
 } from '../game/predict'
+import {
+  countWork,
+  createRaceState,
+  raceReducer,
+  raceWinner,
+} from '../game/race'
 import { calculateStars } from '../game/scoring'
 import { BoxValuesSchema } from '../schemas/boxes'
 import { LEVELS } from './levels'
@@ -33,11 +39,14 @@ describe('level data', () => {
     })
   })
 
-  it('only uses playable modes for now', () => {
+  it('only uses playable modes', () => {
     for (const level of LEVELS) {
-      expect(['be-the-algorithm', 'predict', 'beat-the-algorithm']).toContain(
-        level.mode,
-      )
+      expect([
+        'be-the-algorithm',
+        'predict',
+        'beat-the-algorithm',
+        'race',
+      ]).toContain(level.mode)
     }
   })
 })
@@ -51,6 +60,16 @@ describe.each(LEVELS)('level $id', (level) => {
     expect(getSortingAlgorithm(level.algorithmId)).toBeDefined()
   })
 
+  it('race levels have a different, known rival (and only race levels)', () => {
+    if (level.mode === 'race') {
+      expect(level.rivalId).toBeDefined()
+      expect(level.rivalId).not.toBe(level.algorithmId)
+      expect(getSortingAlgorithm(level.rivalId ?? '')).toBeDefined()
+    } else {
+      expect(level.rivalId).toBeUndefined()
+    }
+  })
+
   it('has sensible lives and star rules', () => {
     expect(Number.isInteger(level.lives)).toBe(true)
     expect(level.lives).toBeGreaterThanOrEqual(1)
@@ -58,11 +77,26 @@ describe.each(LEVELS)('level $id', (level) => {
     expect(level.stars.three).toBeLessThanOrEqual(level.stars.two)
   })
 
-  it('is solvable: following the steps exactly gives 3 stars', () => {
+  it('is solvable: playing it perfectly gives 3 stars', () => {
     const algorithm = getSortingAlgorithm(level.algorithmId)
     if (!algorithm) throw new Error('unknown algorithm')
 
     const steps = algorithm.run(level.input, { order: level.order })
+
+    if (level.mode === 'race') {
+      const rival = getSortingAlgorithm(level.rivalId ?? '')
+      if (!rival) throw new Error('unknown rival')
+      const rivalSteps = rival.run(level.input, { order: level.order })
+
+      // A race level always has a clear winner, never a tie.
+      const winner = raceWinner(countWork(steps), countWork(rivalSteps))
+      expect(winner).not.toBe('tie')
+
+      const state = raceReducer(createRaceState(), winner, winner)
+      expect(state.correct).toBe(true)
+      expect(calculateStars('won', state.correct ? 0 : 1, level.stars)).toBe(3)
+      return
+    }
 
     if (level.mode === 'beat-the-algorithm') {
       const pairs = perfectBeatClicks(steps)
