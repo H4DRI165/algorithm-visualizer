@@ -46,4 +46,12 @@ describe('useProgress', () => {
     const { result } = renderHook(() => useProgress())
     expect(result.current.progress.stars).toEqual({})
   })
+
+  it('records the best arcade score and saves it', () => {
+    const { result } = renderHook(() => useProgress())
+    act(() => result.current.recordArcade(120))
+    act(() => result.current.recordArcade(80))
+    expect(result.current.progress.bestArcadeScore).toBe(120)
+    expect(stored()).toMatchObject({ bestArcadeScore: 120 })
+  })
 })

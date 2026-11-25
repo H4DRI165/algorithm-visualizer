@@ -9,6 +9,7 @@ function setup(progress = emptyProgress()) {
   const user = userEvent.setup()
   const onSelect = vi.fn()
   const onPractice = vi.fn()
+  const onArcade = vi.fn()
   const onResetProgress = vi.fn()
   render(
     <LevelMap
@@ -16,10 +17,11 @@ function setup(progress = emptyProgress()) {
       progress={progress}
       onSelect={onSelect}
       onPractice={onPractice}
+      onArcade={onArcade}
       onResetProgress={onResetProgress}
     />,
   )
-  return { user, onSelect, onPractice, onResetProgress }
+  return { user, onSelect, onPractice, onArcade, onResetProgress }
 }
 
 describe('LevelMap', () => {
@@ -69,6 +71,22 @@ describe('LevelMap', () => {
     const { user, onPractice } = setup()
     await user.click(screen.getByRole('button', { name: 'Free practice' }))
     expect(onPractice).toHaveBeenCalledOnce()
+  })
+
+  it('opens Arcade and shows the best score', async () => {
+    const { user, onArcade } = setup({
+      ...emptyProgress(),
+      bestArcadeScore: 120,
+    })
+    await user.click(screen.getByRole('button', { name: 'Arcade (best 120)' }))
+    expect(onArcade).toHaveBeenCalledOnce()
+  })
+
+  it('shows a best score of 0 at the start', () => {
+    setup()
+    expect(
+      screen.getByRole('button', { name: 'Arcade (best 0)' }),
+    ).toBeInTheDocument()
   })
 
   it('asks before resetting progress', async () => {

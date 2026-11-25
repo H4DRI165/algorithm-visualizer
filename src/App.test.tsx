@@ -93,6 +93,19 @@ describe('App', () => {
     ).toBeInTheDocument()
   })
 
+  it('opens Arcade, saves the best score and comes back', async () => {
+    const user = userEvent.setup()
+    render(<App />)
+    await user.click(screen.getByRole('button', { name: /^Arcade/ }))
+    expect(screen.getByRole('heading', { name: 'Arcade' })).toBeInTheDocument()
+    expect(screen.getByLabelText('Game stats')).toHaveTextContent('Round 1')
+
+    await user.click(screen.getByRole('button', { name: 'Back to map' }))
+    expect(
+      screen.getByRole('heading', { name: 'Choose a level' }),
+    ).toBeInTheDocument()
+  })
+
   it('resetting progress locks the levels again', async () => {
     const user = userEvent.setup()
     render(<App />)
