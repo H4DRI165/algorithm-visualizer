@@ -22,11 +22,17 @@ export type SortStep = BaseStep &
 
 export type CompareStyle = 'swap' | 'smallest'
 
+export interface Explanation {
+  summary: string
+  analogy: string
+  whenToUse: string
+}
+
 export interface AlgorithmDef<TInput, TStep> {
   id: string
   name: string
   category: 'sorting' | 'searching' | 'pathfinding'
   complexity: { best: string; average: string; worst: string; space: string }
+  explanation: Explanation
   run: (input: TInput, opts?: { order: Order }) => TStep[]
-  // `explanation` is added in Phase 14.
 }

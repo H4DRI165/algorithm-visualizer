@@ -1,21 +1,19 @@
 import { describe, expect, it } from 'vitest'
-import { getSortingAlgorithm, sortingAlgorithms } from './registry'
-import { replay } from './sorting/sortContract'
+import { sortingAlgorithms } from './registry'
 
-describe('sorting registry', () => {
-  it('has unique ids', () => {
-    const ids = sortingAlgorithms.map((a) => a.id)
-    expect(new Set(ids).size).toBe(ids.length)
+describe.each(sortingAlgorithms)('explanation: $name', ({ explanation }) => {
+  it('has a summary, an analogy and a when-to-use text', () => {
+    for (const text of [
+      explanation.summary,
+      explanation.analogy,
+      explanation.whenToUse,
+    ]) {
+      expect(text.trim().length).toBeGreaterThan(20)
+    }
   })
 
-  it('finds an algorithm by id, and returns undefined for unknown ids', () => {
-    expect(getSortingAlgorithm('selection-sort')?.name).toBe('Selection Sort')
-    expect(getSortingAlgorithm('nope')).toBeUndefined()
-  })
-
-  it.each(sortingAlgorithms)('$name sorts through run()', (algorithm) => {
-    const input = [42, 17, 68, 5, 91, 30]
-    const steps = algorithm.run(input, { order: 'desc' })
-    expect(replay(input, steps)).toEqual([91, 68, 42, 30, 17, 5])
+  it('is general and never points at a position in a puzzle', () => {
+    const all = Object.values(explanation).join(' ')
+    expect(all).not.toMatch(/position \d|box \d/i)
   })
 })

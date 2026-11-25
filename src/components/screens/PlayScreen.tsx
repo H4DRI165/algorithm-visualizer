@@ -27,6 +27,7 @@ import { SplitLayout } from '../layout/SplitLayout'
 import { WatchScreen } from './WatchScreen'
 import { useFlashAnchor } from '../../hooks/useFlashAnchor'
 import { useGameSounds } from '../../hooks/useGameSounds'
+import { AboutPanel } from '../learn/AboutPanel'
 
 export interface GameResult {
   stars: Stars
@@ -101,6 +102,7 @@ export function PlayScreen({
         startAt={watchFrom}
         onClose={() => setWatchFrom(null)}
         closeLabel="Back to game"
+        algorithm={algorithm}
       />
     )
   }
@@ -183,6 +185,7 @@ export function PlayScreen({
           />
         }
       />
+      <AboutPanel algorithm={algorithm} />
     </section>
   )
 }
